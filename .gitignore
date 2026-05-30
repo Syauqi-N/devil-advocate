@@ -23,3 +23,5 @@ tmp/
 # Env files
 .env*
 !.env.example
+*.bak*
+.env.local*
