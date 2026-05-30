@@ -1,0 +1,40 @@
+services:
+  da-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: da-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:8001"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://devil_advocate:devil_advocate_pass@host.docker.internal:5432/devil_advocate_db
+      - LLM_BASE_URL=http://host.docker.internal:20128/v1
+      - CORS_ORIGINS=https://debate.soqisoqi.my.id,http://localhost:3006
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - da-network
+
+  da-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: da-frontend
+    restart: unless-stopped
+    ports:
+      - "3006:3006"
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      - INTERNAL_API_URL=http://da-backend:8001
+    depends_on:
+      - da-backend
+    networks:
+      - da-network
+
+networks:
+  da-network:
+    driver: bridge
